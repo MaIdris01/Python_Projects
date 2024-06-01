@@ -9,13 +9,13 @@ api_url = 'http://api.openweathermap.org/data/2.5/weather?'
 # Enter the city name for which you want to get the weather data
 location = input("Enter city name: ")
 
-all_url = api_url + 'q=' + location + '&appid=' + api_key + '&units=metric' 
+all_url = f"{api_url}q={location}&appid={api_key}&units=metric" 
 
 response = requests.get(all_url)
 
 # Getting data in JSON format
 data = response.json()
-#print(data)
+# print(data)
 
 # Check if the city exists
 if data['cod'] == '404':
@@ -30,8 +30,8 @@ else:
     wind_speed = data['wind']['speed']
 
     # Printing weather data
-    print("Weather in {}: ".format(location))
-    print("Temperature: {}°C".format(temperature))
-    print("Description: {}".format(description))
-    print("Humidity: {}%".format(humidity))
-    print("Wind Speed: {} m/s".format(wind_speed))
+    print(f"Weather in {location}: ")
+    print(f"Temperature: {temperature}°C")
+    print(f"Description: {description}")
+    print(f"Humidity: {humidity}%")
+    print(f"Wind Speed: {wind_speed} m/s")
