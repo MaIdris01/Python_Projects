@@ -1,5 +1,7 @@
 import requests
 
+import matplotlib.pyplot as plt
+
 # The API key
 api_key = "de4208bc2c280287b9df4c61ae3a87ba"
 
@@ -28,10 +30,26 @@ else:
     humidity = weather['humidity']
     description = data['weather'][0]['description']
     wind_speed = data['wind']['speed']
+    latitude = data['coord']['lat']
+    longitude = data['coord']['lon']
 
     # Printing weather data
     print(f"Weather in {location}: ")
     print(f"Temperature: {temperature}°C")
     print(f"Description: {description}")
     print(f"Humidity: {humidity}%")
-    print(f"Wind Speed: {wind_speed} m/s")
+    print(f"Latitude: {latitude}")
+    print(f"Longitude: {longitude}")
+
+
+
+# Plots a point on the map for the location
+plt.scatter(longitude, latitude, color='red', label=f"{location}: {description}, {temperature}°C, {humidity}")
+
+# Add labels and legend
+plt.xlabel('Longitude')
+plt.ylabel('Latitude')
+plt.legend()
+
+# Displays the data
+plt.show()
