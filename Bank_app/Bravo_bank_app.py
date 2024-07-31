@@ -20,6 +20,7 @@ except sqlite3.Error as e:
     print(f"SQLite error: {e}")
     exit(1) # Exit the program if the database setup fails
 
+
 # Creating a user here....
 def create_user(username, password):
     try:
