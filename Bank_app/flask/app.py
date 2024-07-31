@@ -1,13 +1,26 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, g
 import sqlite3
 import os
 import sys
 
 app = Flask(__name__)
+DATABASE = 'bank_app.db'
 
+def get_db():
+    if 'db' not in g:
+        g.db = sqlite3.connect(DATABASE)
+        g.db.row_factory = sqlite3.Row
 
-conn = sqlite3.connect('bank_app.db')
-cursor = conn.cursor()
+    return g.db
+
+@app.teardown_appcontext
+def close_connection(exception):
+    db = g.pop('db', None)
+    if db is not None:
+        db.close()
+
+# conn = sqlite3.connect('bank_app.db')
+# cursor = conn.cursor()
 
 
 @app.route('/')
@@ -23,6 +36,9 @@ def create_user():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+        db = get_db()
+        cursor = db.cursor()
+
         try:
             cursor.execute('INSERT INTO users (username, password) VALUES (?, ?)', (username, password))
             conn.commit()
@@ -41,6 +57,8 @@ def sign_in_user():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+        db = get_db()
+        cursor = db.cursor()
         cursor.execute('SELECT * FROM users WHERE username=? AND password=?', (username, password))   
         user = cursor.fetchone()
 
@@ -56,6 +74,8 @@ def sign_in_user():
 # View all users
 def view_users():
     
+    db = get_db()
+    cursor = db.cursor()
     cursor.execute('SELECT id, username FROM users')
     users = cursor.fetchall()
     return render_template('view_users.html', users=users)
@@ -67,8 +87,10 @@ def update_user():
     if request.method == 'POST':
         username = request.form['username']
         new_password = request.form['new_password']
+        db = get_db()
+        cursor = db.cursor()
         cursor.execute('UPDATE users SET password=? WHERE username=?', (new_password, username))
-        conn.commit()
+        db.commit()
         if cursor.rowcount > 0:
             message = f"Password updated successfully for {username},"
         else:
@@ -82,8 +104,11 @@ def update_user():
 def delete_user():
     if request.method == 'POST':
         username = request.form['username']
+        db = get_db()
+        cursor = db.cursor()
         cursor.execute('DELETE FROM users WHERE username=?', (username,))
-        conn.commit()
+        db.commit()
+        
         if cursor.rowcount > 0:
             message = f"User '{username}' deleted successfully."
         else:
