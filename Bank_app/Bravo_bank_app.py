@@ -1,6 +1,6 @@
 import sqlite3
 import os
-
+import bcrypt
 
 print("Current directory:", os.getcwd())
 
@@ -20,11 +20,15 @@ except sqlite3.Error as e:
     print(f"SQLite error: {e}")
     exit(1) # Exit the program if the database setup fails
 
+def hash_password(password):
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+
 
 # Creating a user here....
 def create_user(username, password):
     try:
         cursor.execute('INSERT INTO users (username, password) VALUES (?, ?)', (username, password))
+        hashed_password = hash_password(password)
         conn.commit()
         print(f"User {username} created successfully.")
 
@@ -40,7 +44,7 @@ def sign_in_user(username, password):
     cursor.execute('SELECT * FROM users WHERE username=? AND password=?', (username, password))   
     user = cursor.fetchone()
 
-    if user:
+    if user and bcrypt.checkpw(password.encode('utf-8'), user[0]):
         print(f"Welcome, {username}!")
     else:
         print("Invalid username or password.")
@@ -65,6 +69,7 @@ def view_users():
 # Update user's password here
 def update_user(username, new_password):
     try:
+        hashed_password = hash_password(new_password)
         cursor.execute('UPDATE users SET password=? WHERE username=?', (new_password, username))
         conn.commit()
         if cursor.rowcount > 0:
